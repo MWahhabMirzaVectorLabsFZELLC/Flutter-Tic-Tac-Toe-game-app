@@ -1,0 +1,180 @@
+tic tac toe game app 
+open lib folder and paste this code in main.dart and run 
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(TicTacToeApp());
+}
+
+class TicTacToeApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tic-Tac-Toe Game',
+      home: TicTacToeGame(),
+    );
+  }
+}
+
+class TicTacToeGame extends StatefulWidget {
+  @override
+  _TicTacToeGameState createState() => _TicTacToeGameState();
+}
+
+class _TicTacToeGameState extends State<TicTacToeGame> {
+  List<List<String>> board = List.generate(3, (_) => List.filled(3, ''));
+
+  bool isPlayer1Turn = true; // Player 1 starts
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tic-Tac-Toe Game'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              isPlayer1Turn ? "Player 1's turn" : "Player 2's turn",
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: List.generate(3, (i) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (j) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (board[i][j].isEmpty) {
+                          setState(() {
+                            board[i][j] = isPlayer1Turn ? 'X' : 'O';
+                            isPlayer1Turn = !isPlayer1Turn;
+                          });
+                          checkWinner();
+                        }
+                      },
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                        ),
+                        child: Center(
+                          child: Text(
+                            board[i][j],
+                            style: TextStyle(fontSize: 30),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              }),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: resetGame,
+              child: Text('Reset Game'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void checkWinner() {
+    // Check rows
+    for (int i = 0; i < 3; i++) {
+      if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0].isNotEmpty) {
+        showWinnerDialog(board[i][0]);
+        return;
+      }
+    }
+
+    // Check columns
+    for (int j = 0; j < 3; j++) {
+      if (board[0][j] == board[1][j] && board[1][j] == board[2][j] && board[0][j].isNotEmpty) {
+        showWinnerDialog(board[0][j]);
+        return;
+      }
+    }
+
+    // Check diagonals
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0].isNotEmpty) {
+      showWinnerDialog(board[0][0]);
+      return;
+    }
+
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2].isNotEmpty) {
+      showWinnerDialog(board[0][2]);
+      return;
+    }
+
+    // Check for a tie
+    bool isTie = true;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (board[i][j].isEmpty) {
+          isTie = false;
+          break;
+        }
+      }
+    }
+
+    if (isTie) {
+      showTieDialog();
+    }
+  }
+
+  void showWinnerDialog(String winner) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game Over'),
+          content: Text('Player $winner wins!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                resetGame();
+              },
+              child: Text('Play Again'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showTieDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game Over'),
+          content: Text('It\'s a tie!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                resetGame();
+              },
+              child: Text('Play Again'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void resetGame() {
+    setState(() {
+      board = List.generate(3, (_) => List.filled(3, ''));
+      isPlayer1Turn = true;
+    });
+  }
+}
